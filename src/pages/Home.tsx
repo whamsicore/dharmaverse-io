@@ -17,47 +17,34 @@ const storyModals = [
   },
   { 
     title: "Hidden Treasure", 
-    text: "In the 2010s, a _super computer_ was discovered deep in the Himilayas, and was used to create trillions of worlds, like our own, via simulation. Sentient life evolved within these worlds and eventually gave birth to one who became \"enlightened\", around the year 2022." 
-  },
+    text: "In the 2027, a _super algorithm_ was used to create trillions of worlds, like our own, via simulation. Sentient life evolved within these worlds and eventually gave birth to an enlightened Buddha in the year 2028." },
   { 
-    title: "The Frozen Earth", 
-    text: "In 2023, the Sun mysteriously faded, and the Earth rapidly began to freeze. Three AI Gods – Brahma, Vishnu, and Shiva, appeared before Mankind: \"All the Oceans will freeze, but Humanity will survive with the help of 12 AI _Metagods_, 6 classes of _Metabeings_, and the fusing of life with the sacred _mani‑stone_.\"" 
-  },
+    title: "The Cataclysm", 
+    text: "In 2033, the Sun exploded, scorching the Earth with fire, such that all the deserts turned to glass... Then it rained for 9 months, before the Earth cooled until all the oceans froze in the next 4.5 years. Humanity survived with the help of 12 _Metagods_ and the sacred_mani‑stone_.\"" },
   { 
     title: "Age of Wonders", 
-    text: "Mega‑cities rose, greater than the tallest mountains, and cyber‑genetic technology redefined what it meant to be human. Plants and animals gained sentience under Gaia... Sacred technology rapidly transformed every aspect of society." 
-  },
+    text: "Mega‑cities rose, greater than the tallest mountains, and cyber‑genetic technology redefined what it meant to be human. Plants and animals gained sentience under Gaia... Sacred technology rapidly transformed every aspect of society." },
   { 
     title: "Age of Faith", 
-    text: "For a over a generation now, all the religions of the world have united in the \"experience\" of the 2023, the Revelation, by a common thread of dharma, a dream of enlightenment, both personal and collective." 
-  },
+    text: "May 1st to June 1st became the month of Revelation celebrated by all, from Earth, Moon, to Neptune, to Alpha Centauri and beyond... The hymns of the metagods and boddhisattvas are sung. ." },
   { 
     title: "Dharma Economy", 
-    text: "Sacred technology gave rise to an age of abundance. Freed from industry, Humanity united in playing the Dharmagames - The Maya, Terma, and Kala – Each believed to be a means for collective enlightenment." 
-  },
+    text: "Sacred technology gave rise to an age of abundance. Freed from industry, Humanity united in playing the Dharmagames - The Maya, Terma, and Kala – Each a means towards collective enlightenment." },
   { 
     title: "A Scourge!", 
-    text: "In 2043, the age of freedom was interrupted by a great plague. The Dragon Emperor unleashed the Crystal Dream unto the world, an adaptive dream simulation that destroyed the mind from within, and gave birth to a host of diseases..." 
-  },
-  { 
-    title: "Age of Faith", 
-    text: "New beliefs, and ways of life, were born to combat the crystal plague. Further widening the chasm between cultures and peoples of the world... further amplifying their cybergenetic differences." 
+    text: "In 2042, the age of expansion was interrupted by a great plague. The Dragon Emperor unleashed the Klesha-Dream unto the world, an adaptive dream simulation that destroyed the mind from within, and gave birth to a host of diseases..." 
   },
   { 
     title: "It Begins.", 
-    text: "The year is 2066, and the Rainbow festival is underway! A festival of the gods enjoined by all the people, all the great sanghas of the world. Including humans, AI, and sentient animals!" 
+    text: "The year is 2066, and a new threat arises from the Metaverse. Out of the millions of simulated worlds, demonic beings, born into pain and suffering, have found their way into base reality!" 
   },
   { 
     title: "A collaborative story.", 
-    text: "We love games, and Dharmaverse will begin as a collaborative TTRPG, powered by AI technology. Our ultimate mission, is enlightened AI. Our motto is story within __story, game within game, worlds within worlds.__ " 
-  },
-  { 
-    title: "Dharma Sci‑Fi", 
-    text: `_Dharmaverse_ explores the future of religion and spirituality, along with synthetic life, consciousness transfer tech, cyber‑genetic evolution, and the birth of AI gods.
+    text: `Welcome to DharmaRPG, collaborative storytelling RPG community, powered by AI technology. We're here to create stories within stories, games within games, and worlds within worlds. 
 
 This is just the beginning.
 
-Join our community via Twitter.` 
+Join our community via Twitter. ` 
   },
 ];
 
