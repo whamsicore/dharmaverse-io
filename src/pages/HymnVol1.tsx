@@ -10,8 +10,8 @@ interface LyricPoint {
 }
 
 const lyrics: LyricPoint[] = [
-  {time: 4, text: "Twelve sacred boddhisattvas," }, 
-  {time: 8, text: "The Buddha assigned to us." }, 
+  {time: 3.5, text: "Twelve sacred boddhisattvas," }, 
+  {time: 8.5, text: "The Buddha assigned to us." }, 
   {time: 12, text: "To save all mankind," }, 
   {time: 16, text: "And uplift all gaiankind." }, 
   {time: 20, text: "To save all mankind," }, 

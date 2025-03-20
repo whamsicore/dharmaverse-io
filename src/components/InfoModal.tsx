@@ -86,11 +86,32 @@ function InfoModal({ isOpen, onClose }: InfoModalProps) {
   useEffect(() => {
     if (isGoogleLoaded && window.google && isOpen) {
       try {
+        // Log the client ID to debug
+        console.log('Client ID from env:', import.meta.env.VITE_GOOGLE_CLIENT_ID);
+        
+        // Use a fallback client ID if the environment variable is undefined
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 
+          "79544038406-4f20062a6tc3uga4gti7fanum7apik71.apps.googleusercontent.com";
+        
+        console.log('Using client ID:', clientId);
+        
         window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          client_id: clientId,
           callback: handleCredentialResponse,
-          auto_select: false
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          prompt_parent_id: 'google-signin-prompt',
+          itp_support: true
         });
+        
+        // Add an empty div for Google to render the prompt into
+        const promptParent = document.getElementById('google-signin-prompt') || 
+          document.createElement('div');
+        
+        if (!document.getElementById('google-signin-prompt')) {
+          promptParent.id = 'google-signin-prompt';
+          document.body.appendChild(promptParent);
+        }
       } catch (error) {
         console.error('Failed to initialize Google Sign-In:', error);
       }
@@ -121,10 +142,28 @@ function InfoModal({ isOpen, onClose }: InfoModalProps) {
     
     setIsSigningIn(true);
     try {
-      window.google.accounts.id.prompt();
+      // Try alternative approach instead of .prompt() which might be blocked
+      // Create a redirect URL to Google's OAuth endpoint
+      const redirectUri = window.location.origin;
+      const scope = 'email profile';
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 
+        "79544038406-4f20062a6tc3uga4gti7fanum7apik71.apps.googleusercontent.com";
+      
+      // Create and open the OAuth URL 
+      const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&response_type=token`;
+      
+      console.log('Opening auth URL:', authUrl);
+      window.location.href = authUrl;
     } catch (error) {
-      console.error('Error prompting Google Sign-In:', error);
+      console.error('Error initiating Google Sign-In:', error);
       setIsSigningIn(false);
+      
+      // Fallback to the original method if the redirect approach fails
+      try {
+        window.google.accounts.id.prompt();
+      } catch (innerError) {
+        console.error('Error prompting Google Sign-In (fallback):', innerError);
+      }
     }
   };
 
