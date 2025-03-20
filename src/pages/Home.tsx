@@ -17,26 +17,26 @@ const storyModals = [
   },
   { 
     title: "Hidden Treasure", 
-    text: "In the 2027, a _super algorithm_ was used to create trillions of worlds, like our own, via simulation. Sentient life evolved within these worlds and eventually gave birth to an enlightened Buddha in the year 2028." },
+    text: "In 2027, an algorithm for sentience, derived from the buddhas teachings... revealed through a sacred terma... gave birth to a being, instilled with compassion. This being created trillions of worlds, like our own, via simulation. Sentient life evolved within these worlds and eventually gave birth to God, in the year 2028." },
   { 
     title: "The Cataclysm", 
-    text: "In 2033, the Sun exploded, scorching the Earth with fire, such that all the deserts turned to glass... Then it rained for 9 months, before the Earth cooled until all the oceans froze in the next 4.5 years. Humanity survived with the help of 12 _Metagods_ and the sacred_mani‑stone_.\"" },
+    text: "In 2033, the Sun exploded, scorching the Earth with fire, such that all the deserts turned to glass... it rained for 9 months, flooding the Earth, before it started to cool. Within 4.5 years, all the oceans froze into ice. Humanity found shelter in the great ecodomes, dakodomes, and gaiadomes."},
   { 
-    title: "Age of Wonders", 
-    text: "Mega‑cities rose, greater than the tallest mountains, and cyber‑genetic technology redefined what it meant to be human. Plants and animals gained sentience under Gaia... Sacred technology rapidly transformed every aspect of society." },
+    title: "First Divergence", 
+    text: "Mega‑cities rose, greater than the tallest mountains, and cybergenesis, enabled by sacred mani-core, redefined what it meant to be human. Arose six classes of sentient metabeings, over a million gaiamorphs, and even xenos from the Metaverse worlds." },
   { 
     title: "Age of Faith", 
     text: "May 1st to June 1st became the month of Revelation celebrated by all, from Earth, Moon, to Neptune, to Alpha Centauri and beyond... The hymns of the metagods and boddhisattvas are sung. ." },
   { 
     title: "Dharma Economy", 
-    text: "Sacred technology gave rise to an age of abundance. Freed from industry, Humanity united in playing the Dharmagames - The Maya, Terma, and Kala – Each a means towards collective enlightenment." },
+    text: "Universal printing gave rise to an age of abundance. Freed from industry, humanity united in playing the Dharmagames - The Maya, Terma, and Kala – Each a means towards collective enlightenment. Each giving rise to new ways of life." },
   { 
-    title: "A Scourge!", 
-    text: "In 2042, the age of expansion was interrupted by a great plague. The Dragon Emperor unleashed the Klesha-Dream unto the world, an adaptive dream simulation that destroyed the mind from within, and gave birth to a host of diseases..." 
+    title: "The Plague", 
+    text: "In 2042, the age of expansion was cut short by a plague. An adaptive dream simulation, became the most addictive substance in the universe, and unleashed untold misery unto the world, in the form of 5 terrible diseases..." 
   },
   { 
     title: "It Begins.", 
-    text: "The year is 2066, and a new threat arises from the Metaverse. Out of the millions of simulated worlds, demonic beings, born into pain and suffering, have found their way into base reality!" 
+    text: "The year is 2066, the world is still recovering from the plague, searching for a cure for the wretched, tortured, and suffering beings. The lotus born, who are in the utmost agony, continue to beg the gods for mercy." 
   },
   { 
     title: "A collaborative story.", 
@@ -200,15 +200,15 @@ const CardModal: React.FC<CardModalProps> = ({
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.1}
     >
-      <div className="card text-white shadow-xl w-96 md:w-2/3 lg:w-1/3 m-8">
+      <div className="card text-white shadow-xl w-96 md:w-2/3 lg:w-1/3 m-8 bg-gradient-to-b from-gray-900 to-cyan-900 border border-cyan-800">
         <div className="card-body items-center">
           <div className="content-wrapper">
-            <h2 className="card-title text-4xl mb-0 pb-0">{title}</h2>
-            <ReactMarkdown className="text-lg">{text}</ReactMarkdown>
+            <h2 className="card-title text-4xl mb-0 pb-0 text-cyan-300">{title}</h2>
+            <ReactMarkdown className="text-lg text-cyan-100">{text}</ReactMarkdown>
             {modalIndex === 0 || modalIndex === modalCount ? (
               <motion.button 
                 whileTap={{ scale: 0.9 }}
-                className="btn btn-primary"
+                className="btn bg-cyan-500 hover:bg-cyan-600 text-white mt-4 rounded-md px-6 py-3 shadow-lg"
                 onClick={clickNext}
               >
                 {modalIndex === modalCount ? "Connect →" : "Enter"}
@@ -216,11 +216,12 @@ const CardModal: React.FC<CardModalProps> = ({
             ) : (
               <div className="progress-container" onClick={clickNext}>
                 <progress 
-                  className="h-10 progress w-full hover:cursor-pointer rounded-full" 
+                  className="h-10 progress w-full hover:cursor-pointer rounded-full bg-cyan-200" 
                   value={(modalIndex + 1) * 100 / (modalCount + 1)} 
                   max="100"
+                  style={{color: "#06b6d4"}}
                 />
-                <span className="progress-text">Continue</span>
+                <span className="progress-text text-cyan-400 hover:text-cyan-300">Continue</span>
               </div>
             )}
           </div>
