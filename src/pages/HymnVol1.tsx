@@ -52,6 +52,10 @@ function HymnVol1() {
   // Add state for dynamic title
   const [pageTitle, setPageTitle] = useState("Opening Hymn");
 
+  // Add state for viewport height adjustments
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const lyricsContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -181,27 +185,28 @@ function HymnVol1() {
     }
   }, [isPlaying]);
 
-  // New useEffect to handle viewport height for mobile browsers
+  // Update useEffect to also track viewport height changes
   useEffect(() => {
     // Function to set the correct viewport height
-    const setViewportHeight = () => {
+    const setViewportHeightValue = () => {
       // First get the viewport height and multiply it by 1% to get a value for a vh unit
       const vh = window.innerHeight * 0.01;
       // Then set the value in the --vh custom property to the root of the document
       document.documentElement.style.setProperty('--vh', `${vh}px`);
+      // Also update state for dynamic calculations
+      setViewportHeight(window.innerHeight);
     };
 
     // Set the height initially
-    setViewportHeight();
+    setViewportHeightValue();
 
     // Add event listener to update on resize/orientation change
-    window.addEventListener('resize', setViewportHeight);
-    window.addEventListener('orientationchange', setViewportHeight);
+    window.addEventListener('resize', setViewportHeightValue);
+    window.addEventListener('orientationchange', setViewportHeightValue);
 
-    // Clean up
     return () => {
-      window.removeEventListener('resize', setViewportHeight);
-      window.removeEventListener('orientationchange', setViewportHeight);
+      window.removeEventListener('resize', setViewportHeightValue);
+      window.removeEventListener('orientationchange', setViewportHeightValue);
     };
   }, []);
 
@@ -337,6 +342,21 @@ function HymnVol1() {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  // Calculate spacing for lyrics based on viewport
+  const getLyricSpacing = () => {
+    // Base spacing
+    let spacing = 40;
+    
+    // Adjust based on device height
+    if (viewportHeight < 600) {
+      spacing = 30; // Smaller spacing for small devices
+    } else if (viewportHeight > 900) {
+      spacing = 50; // Larger spacing for larger devices
+    }
+    
+    return spacing;
+  };
+
   return (
     <div className="min-h-screen overflow-hidden relative flex flex-col" 
          style={{ 
@@ -351,8 +371,9 @@ function HymnVol1() {
         style={{ pointerEvents: 'none' }} // Ensure canvas doesn't block interactions
       />
       
-      <div className="flex-1 flex flex-col text-white p-4 sm:p-8 relative z-10">
-        <h1 className="text-4xl font-bold mb-4 text-center">{pageTitle}</h1>
+      <div className="flex-1 flex flex-col text-white p-4 sm:p-8 pt-safe pb-0 relative z-10" 
+           style={{ maxHeight: 'calc(var(--vh, 1vh) * 100)' }}>
+        <h1 className="text-4xl font-bold mb-2 text-center">{pageTitle}</h1>
 
         {/* Audio element (hidden) */}
         <audio
@@ -362,52 +383,56 @@ function HymnVol1() {
           preload="auto"
         />
         
-        {/* Lyrics Display */}
-        <div className="relative h-64 sm:h-72 flex-grow mb-4">
+        {/* Lyrics Display - Make this more adaptive to viewport height */}
+        <div 
+          ref={lyricsContainerRef}
+          className="relative flex-grow flex items-center justify-center overflow-hidden"
+          style={{ minHeight: '20vh', maxHeight: '50vh' }}
+        >
           <AnimatePresence initial={false}>
-            {recentLyrics.map((lyric, index) => (
-              <motion.div
-                key={lyric.id}
-                initial={{ opacity: 0, y: 40, scale: 0.9 }}
-                animate={{ 
-                  opacity: 1 - (index * 0.2), 
-                  y: -index * 40, // Negative value to move upward
-                  scale: 1 - (index * 0.1)
-                }}
-                exit={{ 
-                  opacity: 0, 
-                  y: -200, // Negative value to exit upward
-                  scale: 0.6,
-                  transition: {
-                    duration: 1.2,
-                    ease: "easeIn"
-                  }
-                }}
-                transition={{ 
-                  duration: 0.8,
-                  ease: "easeInOut"
-                }}
-                className="text-xl text-center absolute w-full left-0 bottom-0 origin-bottom text-white"
-                style={{
-                  zIndex: 100 - index,
-                  transform: `translateY(${-index * 40}px) scale(${1 - (index * 0.1)})`,
-                  textShadow: '0 0 8px rgba(0, 0, 0, 0.8), 0 0 3px rgba(0, 0, 0, 0.9), 0 0 5px rgba(0, 0, 0, 0.7)'
-                }}
-              >
-                {lyric.text}
-              </motion.div>
-            ))}
+            {recentLyrics.map((lyric, index) => {
+              const spacing = getLyricSpacing();
+              return (
+                <motion.div
+                  key={lyric.id}
+                  initial={{ opacity: 0, y: 40, scale: 0.9 }}
+                  animate={{ 
+                    opacity: 1 - (index * 0.2), 
+                    y: -index * spacing, 
+                    scale: 1 - (index * 0.1)
+                  }}
+                  exit={{ 
+                    opacity: 0, 
+                    y: -200, 
+                    scale: 0.6,
+                    transition: {
+                      duration: 1.2,
+                      ease: "easeIn"
+                    }
+                  }}
+                  transition={{ 
+                    duration: 0.8,
+                    ease: "easeInOut"
+                  }}
+                  className="text-xl text-center absolute w-full left-0 bottom-0 origin-bottom text-white px-2"
+                  style={{
+                    zIndex: 100 - index,
+                    transform: `translateY(${-index * spacing}px) scale(${1 - (index * 0.1)})`,
+                    textShadow: '0 0 8px rgba(0, 0, 0, 0.8), 0 0 3px rgba(0, 0, 0, 0.9), 0 0 5px rgba(0, 0, 0, 0.7)'
+                  }}
+                >
+                  {lyric.text}
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
         
-        {/* Spacer to push controls to bottom but maintain safe area */}
-        <div className="flex-grow"></div>
-        
-        {/* Audio Player Controls - Fixed at bottom with safe area padding */}
-        <div className="max-w-2xl mx-auto w-full bg-black/30 backdrop-blur-lg rounded-lg p-4 sm:p-6 border border-white/10 mb-4 sm:mb-4 pb-safe">
+        {/* Audio Player Controls - Fixed sizing for mobile */}
+        <div className="max-w-2xl mx-auto w-full bg-black/30 backdrop-blur-lg rounded-lg p-3 sm:p-5 border border-white/10 mb-safe mt-auto">
           {/* Progress Bar */}
           <div 
-            className="h-3 bg-white/10 rounded-full cursor-pointer mb-2"
+            className="h-2 sm:h-3 bg-white/10 rounded-full cursor-pointer mb-1 sm:mb-2"
             onClick={handleProgressClick}
           >
             <div 
@@ -419,7 +444,7 @@ function HymnVol1() {
           </div>
 
           {/* Time Display */}
-          <div className="text-sm text-white/60 mb-4">
+          <div className="text-xs sm:text-sm text-white/60 mb-2">
             {formatTime(currentTime)}
           </div>
           
@@ -427,10 +452,10 @@ function HymnVol1() {
             {/* Reset Button */}
             <button
               onClick={resetToStart}
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-white/20 
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 
                        flex items-center justify-center transition-colors"
             >
-              <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
@@ -438,15 +463,15 @@ function HymnVol1() {
             {/* Play/Pause Button */}
             <button
               onClick={togglePlay}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/10 hover:bg-white/20 
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/10 hover:bg-white/20 
                        flex items-center justify-center transition-colors"
             >
               {isPlaying ? (
-                <svg className="w-8 h-8 sm:w-10 sm:h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               ) : (
-                <svg className="w-8 h-8 sm:w-10 sm:h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -456,11 +481,11 @@ function HymnVol1() {
             {/* Info Button */}
             <button
               onClick={() => setIsModalOpen(true)}
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-white/20 
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 
                        flex items-center justify-center transition-colors"
               aria-label="Track Information"
             >
-              <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>

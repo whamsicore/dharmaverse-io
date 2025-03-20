@@ -8,6 +8,10 @@ export default {
     extend: {
       padding: {
         'safe': 'env(safe-area-inset-bottom)',
+        'pt-safe': 'env(safe-area-inset-top)',
+      },
+      margin: {
+        'safe': 'env(safe-area-inset-bottom)',
       }
     },
   },
