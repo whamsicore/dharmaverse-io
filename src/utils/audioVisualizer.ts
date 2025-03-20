@@ -1,6 +1,6 @@
 /**
  * Audio visualizer utility that creates a continuous light stream visualization.
- * Rays emerge from three different locations (0°, 120°, 240°) with shifting rainbow colors.
+ * Rays emerge from three different locations (0°, 120°, 240°) with shifting magenta, yellow, and cyan colors.
  */
 
 export class AudioVisualizer {
@@ -17,31 +17,28 @@ export class AudioVisualizer {
   private isPlaying: boolean = false; // Track if music is actively playing
   
   // Fixed ray configuration
-  private rayCount: number = 120; // Increased from 36 for more density
+  private rayCount: number = 120; // Number of rays for smooth visualization
   private rayAngleStep: number = (Math.PI * 2) / 120; // Angular step between rays
-  private rayPositions: number[] = []; // Array to track ray positions for clarity
+  private rayPositions: number[] = []; // Array to track ray positions
   private rays: {
     intensity: number;  // Audio intensity when ray was created
     length: number;     // Length of the ray
     thickness: number;  // Thickness of the ray
     alpha: number;      // Alpha/opacity of the ray
-    age: number;        // Age of the ray (in rays added since creation)
+    age: number;        // Age of the ray (in frames since creation)
     source: number;     // Which source this ray came from (0, 1, or 2)
-    hue: number;        // Hue for rainbow color shifting
+    hue: number;        // Hue for color
   }[] = [];
   
-  // Animation and pattern parameters
-  private rotationSpeed: number = 0.3; // Reduced from 1 - much slower rotation
-  private sineFrequency: number = 0.1; // Reduced from 0.15 - slower sine wave
-  private sineAmplitude: number = 0.5; // Amplitude of the sine wave effect
+  // Animation parameters
+  private rotationSpeed: number = 0.15; // Controls rotation speed
   
   // Multi-source parameters
-  private sourceCount: number = 3; // Number of ray sources (at 0°, 120°, 240°)
-  private sourceAngles: number[] = [-Math.PI/2, -Math.PI/2 + (Math.PI*2/3), -Math.PI/2 + (Math.PI*4/3)]; // Fixed angles
-  private sourceTimers: number[] = [0, 0, 0]; // Separate timers for each source
+  private sourceCount: number = 3; // Three ray sources
+  private sourceAngles: number[] = [-Math.PI/2, -Math.PI/2 + (Math.PI*2/3), -Math.PI/2 + (Math.PI*4/3)]; // Fixed at 0°, 120°, 240°
   private sourceLastAddTimes: number[] = [0, 0, 0]; // Last ray add time for each source
-  private sourceHues: number[] = [0, 120, 240]; // Initial hues for each source
-  private hueShiftSpeed: number = 0.05; // Slowed down from 0.1 - more gradual color shifts
+  private sourceHues: number[] = [300, 60, 180]; // Magenta, Yellow, Cyan hues
+  private hueShiftSpeed: number = 0.03; // Controls color shift speed
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -64,8 +61,8 @@ export class AudioVisualizer {
       thickness: 0,
       alpha: 0,
       age: this.rayCount, // Mark as old enough to be replaced
-      source: 0, // Which source this ray came from (0, 1, or 2)
-      hue: 0 // Initial hue
+      source: 0,
+      hue: 0
     }));
     
     // Initialize positions array
@@ -74,15 +71,9 @@ export class AudioVisualizer {
       this.rayPositions.push(i);
     }
     
-    // Initialize source-specific timers with different phases
-    this.sourceTimers = [0, Math.PI / 3, Math.PI * 2 / 3]; // Start at different phases
-    
     // Initialize last ray add times
     const now = performance.now();
     this.sourceLastAddTimes = [now, now, now];
-    
-    // Set initial rotation speed
-    this.rotationSpeed = 0.3; // Much slower rays per second per source
   }
 
   private resizeCanvas() {
@@ -178,7 +169,6 @@ export class AudioVisualizer {
     
     // Get current time for animations
     const now = performance.now();
-    const delta = now - this.lastUpdate;
     this.lastUpdate = now;
     
     // Shift hues for rainbow effect
@@ -189,45 +179,48 @@ export class AudioVisualizer {
     // Get frequency data
     this.analyser.getByteFrequencyData(this.dataArray);
     
-    // Calculate overall audio energy
-    const averageEnergy = Array.from(this.dataArray).reduce((sum, value) => sum + value, 0) / 
-                          this.dataArray.length / 255;
+    // Use identical frequency bands for all three sections
+    // Each section gets an identical part of the spectrum
+    const sectionSize = Math.floor(this.bufferLength / 3);
     
-    // Calculate separate bands for different frequency responses
-    const bassRange = this.dataArray.slice(0, Math.floor(this.bufferLength * 0.2));
-    const midRange = this.dataArray.slice(Math.floor(this.bufferLength * 0.2), Math.floor(this.bufferLength * 0.6));
-    const trebleRange = this.dataArray.slice(Math.floor(this.bufferLength * 0.6));
+    // Extract data for each section using the same formula
+    const section1 = this.dataArray.slice(0, sectionSize);
+    const section2 = this.dataArray.slice(sectionSize, sectionSize * 2);
+    const section3 = this.dataArray.slice(sectionSize * 2);
     
-    const getAverage = (arr: Uint8Array) => arr.reduce((acc, val) => acc + val, 0) / arr.length / 255;
+    // Calculate intensity the same way for all sections
+    const calculateIntensity = (data: Uint8Array) => {
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) {
+        sum += data[i];
+      }
+      return sum / (data.length * 255); // Normalize to 0-1
+    };
     
-    const bassValue = getAverage(bassRange);
-    const midValue = getAverage(midRange);
-    const trebleValue = getAverage(trebleRange);
-    
-    // Different frequency ranges for different sources
-    const energyValues = [bassValue, midValue, trebleValue];
+    // Calculate intensities exactly the same way for all sections
+    const intensities = [
+      calculateIntensity(section1),
+      calculateIntensity(section2),
+      calculateIntensity(section3)
+    ];
     
     // Only add rays when music is playing
     if (this.isPlaying) {
       // Check each source to see if it should add a ray
       for (let sourceIndex = 0; sourceIndex < this.sourceCount; sourceIndex++) {
-        // Each source has slightly different base interval
-        const baseInterval = 1000 / this.rotationSpeed;
-        const minInterval = 10;
-        const maxInterval = 800 + (sourceIndex * 150); // Increased from 500 - slower ray addition
-        
-        // Calculate interval based on the frequency band this source responds to
-        const sourceEnergy = energyValues[sourceIndex];
-        let interval = maxInterval - (sourceEnergy * (maxInterval - minInterval));
+        // Use a constant interval for consistent ray creation
+        const interval = 300; // milliseconds
         
         // Check if it's time to add a new ray for this source
         if (now - this.sourceLastAddTimes[sourceIndex] >= interval) {
-          // Use audio data appropriate for this source
-          let intensity = energyValues[sourceIndex];
-          if (intensity < 0.1) intensity = 0.1; // Minimum intensity
+          // Get current intensity for this source - identical for all
+          const intensity = Math.max(0.1, intensities[sourceIndex]);
           
           // Add a new ray from this source
           this.addRay(intensity, sourceIndex);
+          
+          // Update last add time
+          this.sourceLastAddTimes[sourceIndex] = now;
         }
       }
     }
@@ -262,14 +255,19 @@ export class AudioVisualizer {
       // Final angle combines source position and angle within that source's sector
       const angle = sourceAngle - (sectorSize / 2) + (angleWithinSector % sectorSize);
       
+      // Apply animation for ray growth - rays grow to full length over time
+      const growthDuration = 10; // Number of frames to reach full length
+      const growthFactor = Math.min(1, ray.age / growthDuration);
+      const animatedLength = ray.length * growthFactor;
+      
       // Calculate end point
-      const x = centerX + Math.cos(angle) * ray.length;
-      const y = centerY + Math.sin(angle) * ray.length;
+      const x = centerX + Math.cos(angle) * animatedLength;
+      const y = centerY + Math.sin(angle) * animatedLength;
       
       // Draw the ray with more segments for a smoother effect
       const segments = 15;
       
-      // Bright rainbow shifting colors (brighter saturation and lightness)
+      // Use the ray's hue
       const hue = ray.hue;
       const saturation = 100; // Full saturation
       const lightness = 60; // Bright but not washed out
@@ -280,8 +278,8 @@ export class AudioVisualizer {
         const nextSegRatio = (j + 1) / segments;
         
         // Start slightly away from center
-        const startDist = ray.length * (j === 0 ? 0.01 : segRatio);
-        const endDist = ray.length * nextSegRatio;
+        const startDist = animatedLength * (j === 0 ? 0.01 : segRatio);
+        const endDist = animatedLength * nextSegRatio;
         
         const startX = centerX + Math.cos(angle) * startDist;
         const startY = centerY + Math.sin(angle) * startDist;
@@ -317,44 +315,27 @@ export class AudioVisualizer {
   }
 
   private addRay(baseIntensity: number, sourceIndex: number) {
-    const now = performance.now();
+    // Keep constant intensity for even appearance
+    const intensity = 0.7;
     
-    // Each source has its own sine wave frequency and phase
-    // Source 0: Normal frequency
-    // Source 1: 1.3x frequency (slightly faster) - reduced from 1.5x
-    // Source 2: 0.8x frequency (slightly slower) - increased from 0.75x
-    const frequencyMultipliers = [1, 1.3, 0.8];
+    // Ray length responds to audio intensity - exactly the same for all sections
+    // Allow rays to reach full length of max length
+    const minLength = 0.1;
+    const maxLength = 1.0; // Allow full length (up to 100% of maxLineLength)
     
-    // Use sine wave to modulate the intensity with a unique pattern for each source
-    const frequencyMod = this.sineFrequency * frequencyMultipliers[sourceIndex];
-    const primaryPulse = Math.sin(this.sourceTimers[sourceIndex] * frequencyMod);
-    const secondaryPulse = Math.sin(this.sourceTimers[sourceIndex] * frequencyMod * 2) * 0.3;
-    const sineValue = Math.max(0, primaryPulse + secondaryPulse);
+    // Apply identical intensity amplification to all sections
+    // Use a more aggressive exponent (2.0) to amplify differences for all sections
+    const amplifiedIntensity = Math.pow(baseIntensity, 2.0);
     
-    // Combine audio intensity with sine pattern
-    const baseValue = 0.2 + (baseIntensity * 0.6); 
-    const sineContribution = sineValue * this.sineAmplitude;
-    let intensity = Math.max(0.05, Math.min(1.0, baseValue + sineContribution));
-    
-    // Add some subtle randomness
-    intensity *= (0.9 + Math.random() * 0.2);
-    
-    // Make ray length directly proportional to final intensity
-    const intensitySquared = intensity * intensity; // Emphasize differences
-    
-    // Base length range from 5% to 80% of max length
-    const minLength = 0.05;
-    const maxLength = 0.8;
-    
-    // Calculate length with some randomness
-    const lengthFactor = minLength + (intensitySquared * (maxLength - minLength)) * (0.9 + Math.random() * 0.2);
+    // Calculate final length using identical formula for all sections
+    const lengthFactor = minLength + (amplifiedIntensity * (maxLength - minLength));
     const length = this.maxLineLength * lengthFactor;
     
-    // Make rays wider
-    const thickness = 0.5 + (intensity * 1.5); // Even wider rays for brightness
+    // Width varies with intensity - same for all sections
+    const thickness = 1.0 + (amplifiedIntensity * 1.0);
     
-    // Alpha also based on intensity
-    const alpha = 0.5 + (intensity * 0.5); // Higher base alpha for brighter rays
+    // Alpha varies with intensity - same for all sections
+    const alpha = 0.7 + (amplifiedIntensity * 0.3);
     
     // Clockwise movement - shift all ray positions
     for (let i = 0; i < this.rayPositions.length; i++) {
@@ -364,19 +345,19 @@ export class AudioVisualizer {
     // The new ray always goes at position 0
     const newRayIndex = this.rayPositions.indexOf(0);
     
-    // Get the current hue for this source with much less variation
-    // Reduced random variation from ±15 to ±5 for smoother transitions
-    const hue = (this.sourceHues[sourceIndex] + Math.random() * 10 - 5) % 360;
+    // Get color for this source with minimal variation
+    const baseHue = this.sourceHues[sourceIndex]; // Magenta, Yellow, or Cyan
+    const hue = (baseHue + Math.random() * 4 - 2) % 360; // Small random variation
     
-    // Add the new ray at the calculated index
+    // Add the new ray
     this.rays[newRayIndex] = {
       intensity: intensity,
       length: length,
       thickness: thickness,
       alpha: alpha,
       age: 0, // New ray
-      source: sourceIndex, // Which source this ray came from
-      hue: hue // Current hue for this ray
+      source: sourceIndex,
+      hue: hue
     };
     
     // Increment age of all existing rays
@@ -385,9 +366,5 @@ export class AudioVisualizer {
         this.rays[i].age += 1;
       }
     }
-    
-    // Update time for this source's sine wave pattern - even slower increment
-    this.sourceTimers[sourceIndex] += 0.01; // Reduced from 0.02 for slower wave
-    this.sourceLastAddTimes[sourceIndex] = now;
   }
 } 

@@ -278,7 +278,7 @@ function HymnVol1() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden relative">
+    <div className="min-h-screen overflow-hidden relative flex flex-col">
       {/* Shader background */}
       <canvas 
         ref={canvasRef} 
@@ -286,118 +286,119 @@ function HymnVol1() {
         style={{ pointerEvents: 'none' }} // Ensure canvas doesn't block interactions
       />
       
-      <div className="min-h-screen text-white p-8 relative z-10">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-center">{pageTitle}</h1>
+      <div className="flex-1 flex flex-col text-white p-4 sm:p-8 relative z-10">
+        <h1 className="text-4xl font-bold mb-4 text-center">{pageTitle}</h1>
 
-          {/* Audio element (hidden) */}
-          <audio
-            ref={audioRef}
-            src="/music/hymns.mp3"
-            className="hidden"
-            preload="auto"
-          />
-          
-          {/* Lyrics Display */}
-          <div className="relative h-96 mb-12">
-            <AnimatePresence initial={false}>
-              {recentLyrics.map((lyric, index) => (
-                <motion.div
-                  key={lyric.id}
-                  initial={{ opacity: 0, y: 40, scale: 0.9 }}
-                  animate={{ 
-                    opacity: 1 - (index * 0.2), 
-                    y: -index * 40, // Negative value to move upward
-                    scale: 1 - (index * 0.1)
-                  }}
-                  exit={{ 
-                    opacity: 0, 
-                    y: -200, // Negative value to exit upward
-                    scale: 0.6,
-                    transition: {
-                      duration: 1.2,
-                      ease: "easeIn"
-                    }
-                  }}
-                  transition={{ 
-                    duration: 0.8,
-                    ease: "easeInOut"
-                  }}
-                  className="text-xl text-center absolute w-full left-0 bottom-0 origin-bottom text-white"
-                  style={{
-                    zIndex: 100 - index,
-                    transform: `translateY(${-index * 40}px) scale(${1 - (index * 0.1)})`,
-                    textShadow: '0 0 8px rgba(0, 0, 0, 0.8), 0 0 3px rgba(0, 0, 0, 0.9), 0 0 5px rgba(0, 0, 0, 0.7)'
-                  }}
-                >
-                  {lyric.text}
-                </motion.div>
-              ))}
-            </AnimatePresence>
+        {/* Audio element (hidden) */}
+        <audio
+          ref={audioRef}
+          src="/music/hymns.mp3"
+          className="hidden"
+          preload="auto"
+        />
+        
+        {/* Lyrics Display */}
+        <div className="relative h-64 sm:h-72 flex-grow mb-4">
+          <AnimatePresence initial={false}>
+            {recentLyrics.map((lyric, index) => (
+              <motion.div
+                key={lyric.id}
+                initial={{ opacity: 0, y: 40, scale: 0.9 }}
+                animate={{ 
+                  opacity: 1 - (index * 0.2), 
+                  y: -index * 40, // Negative value to move upward
+                  scale: 1 - (index * 0.1)
+                }}
+                exit={{ 
+                  opacity: 0, 
+                  y: -200, // Negative value to exit upward
+                  scale: 0.6,
+                  transition: {
+                    duration: 1.2,
+                    ease: "easeIn"
+                  }
+                }}
+                transition={{ 
+                  duration: 0.8,
+                  ease: "easeInOut"
+                }}
+                className="text-xl text-center absolute w-full left-0 bottom-0 origin-bottom text-white"
+                style={{
+                  zIndex: 100 - index,
+                  transform: `translateY(${-index * 40}px) scale(${1 - (index * 0.1)})`,
+                  textShadow: '0 0 8px rgba(0, 0, 0, 0.8), 0 0 3px rgba(0, 0, 0, 0.9), 0 0 5px rgba(0, 0, 0, 0.7)'
+                }}
+              >
+                {lyric.text}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+        
+        {/* Spacer to push controls to bottom */}
+        <div className="flex-grow"></div>
+        
+        {/* Audio Player Controls - Fixed at bottom */}
+        <div className="max-w-2xl mx-auto w-full bg-black/30 backdrop-blur-lg rounded-lg p-4 sm:p-6 border border-white/10 mb-4">
+          {/* Progress Bar */}
+          <div 
+            className="h-3 bg-white/10 rounded-full cursor-pointer mb-2"
+            onClick={handleProgressClick}
+          >
+            <div 
+              className="h-full bg-cyan-400/70 rounded-full transition-all"
+              style={{ 
+                width: `${(currentTime / (audioRef.current?.duration || 1)) * 100}%` 
+              }}
+            />
+          </div>
+
+          {/* Time Display */}
+          <div className="text-sm text-white/60 mb-4">
+            {formatTime(currentTime)}
           </div>
           
-          {/* Audio Player Controls - Now below lyrics */}
-          <div className="bg-black/30 backdrop-blur-lg rounded-lg p-6 border border-white/10 mt-auto">
-            {/* Progress Bar */}
-            <div 
-              className="h-3 bg-white/10 rounded-full cursor-pointer mb-4"
-              onClick={handleProgressClick}
+          <div className="flex items-center justify-center gap-4 sm:gap-8">
+            {/* Reset Button */}
+            <button
+              onClick={resetToStart}
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-white/20 
+                       flex items-center justify-center transition-colors"
             >
-              <div 
-                className="h-full bg-cyan-400/70 rounded-full transition-all"
-                style={{ 
-                  width: `${(currentTime / (audioRef.current?.duration || 1)) * 100}%` 
-                }}
-              />
-            </div>
+              <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
 
-            {/* Time Display */}
-            <div className="text-sm text-white/60 mb-6">
-              {formatTime(currentTime)}
-            </div>
-            
-            <div className="flex items-center justify-center gap-8">
-              {/* Reset Button */}
-              <button
-                onClick={resetToStart}
-                className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 
-                         flex items-center justify-center transition-colors"
-              >
-                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            {/* Play/Pause Button */}
+            <button
+              onClick={togglePlay}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/10 hover:bg-white/20 
+                       flex items-center justify-center transition-colors"
+            >
+              {isPlaying ? (
+                <svg className="w-8 h-8 sm:w-10 sm:h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-              </button>
-
-              {/* Play/Pause Button */}
-              <button
-                onClick={togglePlay}
-                className="w-20 h-20 rounded-full bg-white/10 hover:bg-white/20 
-                         flex items-center justify-center transition-colors"
-              >
-                {isPlaying ? (
-                  <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                ) : (
-                  <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                )}
-              </button>
-
-              {/* Info Button */}
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 
-                         flex items-center justify-center transition-colors"
-                aria-label="Track Information"
-              >
-                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              ) : (
+                <svg className="w-8 h-8 sm:w-10 sm:h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-              </button>
-            </div>
+              )}
+            </button>
+
+            {/* Info Button */}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-white/20 
+                       flex items-center justify-center transition-colors"
+              aria-label="Track Information"
+            >
+              <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
