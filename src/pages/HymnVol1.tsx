@@ -293,7 +293,7 @@ function HymnVol1() {
           {/* Audio element (hidden) */}
           <audio
             ref={audioRef}
-            src="/music/hymns.wav"
+            src="/music/hymns.mp3"
             className="hidden"
             preload="auto"
           />
