@@ -181,6 +181,66 @@ function HymnVol1() {
     }
   }, [isPlaying]);
 
+  // New useEffect to handle viewport height for mobile browsers
+  useEffect(() => {
+    // Function to set the correct viewport height
+    const setViewportHeight = () => {
+      // First get the viewport height and multiply it by 1% to get a value for a vh unit
+      const vh = window.innerHeight * 0.01;
+      // Then set the value in the --vh custom property to the root of the document
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    // Set the height initially
+    setViewportHeight();
+
+    // Add event listener to update on resize/orientation change
+    window.addEventListener('resize', setViewportHeight);
+    window.addEventListener('orientationchange', setViewportHeight);
+
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', setViewportHeight);
+      window.removeEventListener('orientationchange', setViewportHeight);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Function to handle fullscreen
+    const handleFullscreen = () => {
+      try {
+        // Try to enter fullscreen mode on initial load
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+          // Browser-specific fullscreen requests
+          elem.requestFullscreen().catch(err => {
+            console.log('Fullscreen request was denied or not supported:', err);
+          });
+        }
+      } catch (error) {
+        console.error('Error attempting to enter fullscreen:', error);
+      }
+    };
+
+    // Try to enter fullscreen when the user interacts with the page
+    const handleInteraction = () => {
+      handleFullscreen();
+      // Remove event listeners after first interaction
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+    };
+
+    // Add event listeners for user interaction
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('touchstart', handleInteraction);
+
+    return () => {
+      // Clean up event listeners
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+    };
+  }, []);
+
   const rewind = (seconds: number) => {
     if (audioRef.current) {
       const newTime = Math.max(0, audioRef.current.currentTime - seconds);
@@ -278,7 +338,12 @@ function HymnVol1() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden relative flex flex-col">
+    <div className="min-h-screen overflow-hidden relative flex flex-col" 
+         style={{ 
+           height: 'calc(var(--vh, 1vh) * 100)',
+           touchAction: 'manipulation', // Prevent double-tap to zoom
+           WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+         }}>
       {/* Shader background */}
       <canvas 
         ref={canvasRef} 
@@ -335,11 +400,11 @@ function HymnVol1() {
           </AnimatePresence>
         </div>
         
-        {/* Spacer to push controls to bottom */}
+        {/* Spacer to push controls to bottom but maintain safe area */}
         <div className="flex-grow"></div>
         
-        {/* Audio Player Controls - Fixed at bottom */}
-        <div className="max-w-2xl mx-auto w-full bg-black/30 backdrop-blur-lg rounded-lg p-4 sm:p-6 border border-white/10 mb-4">
+        {/* Audio Player Controls - Fixed at bottom with safe area padding */}
+        <div className="max-w-2xl mx-auto w-full bg-black/30 backdrop-blur-lg rounded-lg p-4 sm:p-6 border border-white/10 mb-4 sm:mb-4 pb-safe">
           {/* Progress Bar */}
           <div 
             className="h-3 bg-white/10 rounded-full cursor-pointer mb-2"
