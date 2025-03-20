@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #000;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.main-card {
+  pointer-events: auto;
+}
+
+.card {
+  /* Remove backdrop-filter completely */
+  backdrop-filter: none;
+  background-color: rgba(0, 0, 0, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Force text rendering to be crisp */
+.card-body * {
+  font-smooth: always;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.content-wrapper {
+  width: 100%;
+  text-align: center;
+}
+
+.card-body {
+  padding: 2rem;
+  text-rendering: optimizeLegibility;
+}
+
+.card-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-shadow: none;
+}
+
+.progress {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress::-webkit-progress-bar {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+
+.progress::-webkit-progress-value {
+  background-color: rgba(0, 255, 255, 0.7);
+  border-radius: 9999px;
+}
+
+.progress::-moz-progress-bar {
+  background-color: rgba(0, 255, 255, 0.7);
+  border-radius: 9999px;
+}
+
+.btn-primary {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  font-size: 1.125rem;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Typography improvements */
+h1, h2, h3, h4, h5, h6, p, span, button, .text-lg, .progress-text {
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Progress bar container */
+.progress-container {
+  position: relative;
+  width: 14rem;
+  margin: 1.5rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.progress-container .progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  font-size: 0.9rem;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Markdown styles */
+.text-lg {
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  font-weight: 400;
+}
+
+.text-lg em {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.text-lg strong {
+  font-weight: 700;
+  color: #ffffff;
+} 
